@@ -1,0 +1,8 @@
+# Line ending example from: https://code.visualstudio.com/docs/remote/troubleshooting#_resolving-git-line-ending-issues-in-containers-resulting-in-many-modified-files
+
+# Always use LF line endings
+* text=auto eol=lf
+
+# Declare files that will always have CRLF line endings on checkout.
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
