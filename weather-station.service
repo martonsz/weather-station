@@ -1,0 +1,15 @@
+[Unit]
+Description=Weather Station Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/weather-station
+ExecStart=/home/pi/weather-station/.venv/bin/python /home/pi/weather-station/main.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target 

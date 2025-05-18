@@ -1,0 +1,5 @@
+Pillow
+aiohttp
+black
+displayhatmini
+dotenv
