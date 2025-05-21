@@ -2,6 +2,7 @@ import os
 import asyncio
 import aiohttp
 from dotenv import load_dotenv
+from weather_data import WeatherData
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,11 +35,12 @@ async def get_entity_state(session: aiohttp.ClientSession, entity_id: str) -> di
         print(f"Error fetching {entity_id}: {str(e)}")
         return None
 
+
 async def get_thermometer_data(device_base: str) -> dict:
     to_fetch = {
         "temperature": f"{device_base}_temperature",
-        "humidity":    f"{device_base}_humidity",
-        "pressure":    f"{device_base}_pressure",
+        "humidity": f"{device_base}_humidity",
+        "pressure": f"{device_base}_pressure",
     }
 
     async with aiohttp.ClientSession() as session:
@@ -50,17 +52,49 @@ async def get_thermometer_data(device_base: str) -> dict:
         results = {name: await task for name, task in tasks.items()}
         return results
 
+
+async def get_weather_data() -> WeatherData:
+    """
+    Fetch weather data from SMHI integration in Home Assistant.
+    Returns a WeatherData instance, or None if not found.
+    """
+    weather_entity = "weather.smhi_home"
+
+    async with aiohttp.ClientSession() as session:
+        weather_data = await get_entity_state(session, weather_entity)
+        if weather_data:
+            return WeatherData.from_dict(
+                weather_data["attributes"], weather_data["state"]
+            )
+        return None
+
+
 def main():
     device_base = "sensor.temp_carport"
 
     results = asyncio.run(get_thermometer_data(device_base))
-
-    # Print out the results
     for name, data in results.items():
         if data is None:
             print(f"{name.capitalize()}: Not available")
         else:
-            print(f"{name.capitalize()}: {data['state']} {data['attributes']['unit_of_measurement']}")
+            print(
+                f"{name.capitalize()}: {data['state']} {data['attributes']['unit_of_measurement']}"
+            )
+
+    weather_data = asyncio.run(get_weather_data())
+    if weather_data:
+        print(f"Condition: {weather_data.state}")
+        print(
+            f"Temperature: {weather_data.temperature} {weather_data.temperature_unit}"
+        )
+        print(f"Humidity: {weather_data.humidity}%")
+        print(f"Wind Speed: {weather_data.wind_speed} {weather_data.wind_speed_unit}")
+        print(f"Pressure: {weather_data.pressure} {weather_data.pressure_unit}")
+        print(f"Visibility: {weather_data.visibility} {weather_data.visibility_unit}")
+        print(f"Cloud Coverage: {weather_data.cloud_coverage}%")
+        print(f"Thunder Probability: {weather_data.thunder_probability}%")
+    else:
+        print("Weather data not available")
 
 
 if __name__ == "__main__":

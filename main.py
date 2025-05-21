@@ -5,7 +5,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from datetime import datetime
-from ha_client import get_thermometer_data
+from ha_client import get_thermometer_data, get_weather_data
 from display import Display
 
 # Load environment variables
@@ -59,6 +59,24 @@ async def update_temperature():
         return "Error"
 
 
+async def update_weather():
+    try:
+        weather_data = await get_weather_data()
+
+        if weather_data is None:
+            logger.error("Failed to fetch weather data")
+            return "Weather: Error"
+        else:
+            temp = weather_data["temperature"]
+            condition = weather_data["condition"]
+            wind_speed = weather_data["wind_speed"]
+            return f"{condition} {temp}°C {wind_speed}m/s"
+
+    except Exception as e:
+        logger.error(f"Error updating weather: {str(e)}")
+        return "Weather: Error"
+
+
 def get_datetime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -69,14 +87,17 @@ async def main():
     display.graphics.draw_text_centerted("Starting...")
 
     while True:
-        # Update temperature every 5 seconds
+        # Update temperature and weather every 5 seconds
         current_temp = await update_temperature()
+        current_weather = await update_weather()
 
         # Update time every second for 5 seconds
         for _ in range(5):
             display.clear()
             if current_temp:
                 display.graphics.draw_text_centerted(current_temp)
+            if current_weather:
+                display.graphics.draw_text_bottom(current_weather, padding=40)
             display.graphics.draw_text_bottom(get_datetime())
             display.display()
             await asyncio.sleep(1)
