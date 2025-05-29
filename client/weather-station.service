@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/weather-station
-ExecStart=/home/pi/weather-station/.venv/bin/python /home/pi/weather-station/main.py
+WorkingDirectory=/home/pi/weather-station/client
+ExecStart=/home/pi/weather-station/client/.venv/bin/python /home/pi/weather-station/client/main.py
 Restart=always
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1

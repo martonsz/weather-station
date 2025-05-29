@@ -1,9 +1,19 @@
-import os
-import asyncio
 import aiohttp
+import asyncio
+import os
+import sys
+
 from dotenv import load_dotenv
+from pathlib import Path
 from weather_data import WeatherData
 
+project_root = str(Path(__file__).parent.parent)
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from common.logging_config import logger
+
+logger = logger.getChild(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
@@ -75,11 +85,13 @@ def main():
     results = asyncio.run(get_thermometer_data(device_base))
     for name, data in results.items():
         if data is None:
-            print(f"{name.capitalize()}: Not available")
+            print(f"{name.capitalize()}:: Not available")
         else:
             print(
-                f"{name.capitalize()}: {data['state']} {data['attributes']['unit_of_measurement']}"
+                f"{name.capitalize()}:: {data['state']} {data['attributes']['unit_of_measurement']}"
             )
+
+    print("--------------------------------")
 
     weather_data = asyncio.run(get_weather_data())
     if weather_data:
