@@ -92,17 +92,31 @@ class HomeAssistantCardCapture:
         """
         self.page.goto(dashboard_url, wait_until="domcontentloaded")
 
+        # First check if we need to log in
         try:
-            self.page.locator("hui-weather-forecast-card").wait_for(
-                state="visible", timeout=1000
+            # Wait for either the weather card or the login form
+            self.page.wait_for_selector(
+                "hui-weather-forecast-card, input[name='username']",
+                state="visible",
+                timeout=5000
             )
+            
+            # Check if we're on the login page
+            if self.page.locator('input[name="username"]').is_visible():
+                logger.debug("Login form detected, attempting to log in...")
+                self.page.locator('input[name="username"]').fill(HA_USERNAME)
+                self.page.locator('input[name="password"]').fill(HA_PASSWORD)
+                self.page.locator('input[name="password"]').press("Enter")
+                
+                # Wait for the weather card after login
+                self.page.locator("hui-weather-forecast-card").wait_for(
+                    state="visible", timeout=10000
+                )
+            else:
+                logger.debug("Already authenticated, proceeding with capture...")
         except playwright._impl._errors.TimeoutError as e:
-            # Wait for and fill in the login form
-            self.page.locator('input[name="username"]').wait_for(state="visible")
-            self.page.locator('input[name="username"]').fill(HA_USERNAME)
-            self.page.locator('input[name="password"]').wait_for(state="visible")
-            self.page.locator('input[name="password"]').fill(HA_PASSWORD)
-            self.page.locator('input[name="password"]').press("Enter")
+            logger.error(f"Timeout waiting for weather card or login form: {e}")
+            return None
 
         # Set dark theme in local storage
         self.page.evaluate(
@@ -170,7 +184,7 @@ class HomeAssistantCardCapture:
                 resized_img.save(image_path, quality=100)
                 return image_path
             else:
-                logger.info(
+                logger.debug(
                     "Image is already smaller than max dimensions, no scaling needed"
                 )
                 return image_path
