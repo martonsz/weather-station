@@ -38,6 +38,12 @@ def signal_handler(signum: int, frame: Optional[object]) -> None:
 
 
 class WeatherServer(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Don't log health check requests
+        if self.path == '/health':
+            return
+        super().log_message(format, *args)
+
     def do_GET(self):
         # Extract just the path component if full URL is provided
         path = urlparse(self.path).path
