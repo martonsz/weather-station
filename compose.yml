@@ -1,0 +1,13 @@
+services:
+  weather-station:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: weather-card-server
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - server/.env
+    volumes:
+      - .:/app
+    restart: unless-stopped

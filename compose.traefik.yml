@@ -1,0 +1,16 @@
+services:
+  weather-station:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.weather-card-server.rule=Host(`$SUB_DOMAIN.$DOMAIN`)"
+      - "traefik.http.routers.weather-card-server.service=weather-card-server"
+      - "traefik.http.routers.weather-card-server.tls=true"
+      - "traefik.http.routers.weather-card-server.tls.certresolver=$CERT_RESOLVER"
+      - "traefik.http.services.weather-card-server.loadbalancer.server.port=8081"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    name: traefik
+    external: true 

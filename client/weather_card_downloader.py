@@ -15,6 +15,7 @@ logger = logger.getChild(__name__)
 load_dotenv()
 SERVER_URLS = os.getenv("WEATHER_CARD_SERVER_URLS", "http://localhost:8080")
 SERVER_PATH = os.getenv("WEATHER_CARD_SERVER_PATH", "/weather-card")
+API_KEY = os.getenv("API_KEY")
 
 
 class WeatherCardDownloader:
@@ -28,6 +29,7 @@ class WeatherCardDownloader:
         self.output_path = output_path
         self.servers = self._get_server_urls()
         self.server_path = SERVER_PATH
+        self.headers = {"X-API-Key": API_KEY} if API_KEY else {}
 
         logger.info(f"Using servers: {self.servers}, with path: {self.server_path}")
 
@@ -51,7 +53,8 @@ class WeatherCardDownloader:
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
-                        f"{server_url}{self.server_path}"
+                        f"{server_url}{self.server_path}",
+                        headers=self.headers
                     ) as response:
                         if response.status == 200:
                             content = await response.read()
@@ -61,6 +64,9 @@ class WeatherCardDownloader:
                                 f"Successfully downloaded weather card from {server_url}"
                             )
                             return self.output_path
+                        elif response.status == 401:
+                            logger.error(f"Authentication failed for {server_url}")
+                            continue
                         else:
                             logger.warning(
                                 f"Failed to download from {server_url}: Status {response.status}"

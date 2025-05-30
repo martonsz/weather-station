@@ -1,0 +1,4 @@
+services:
+  weather-station:
+    ports:
+      - "8081:8081"
