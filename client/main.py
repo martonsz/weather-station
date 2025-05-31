@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 from pathlib import Path
 import signal
@@ -7,7 +6,6 @@ import signal
 from datetime import datetime
 import sys
 
-import aiohttp
 from display import Display
 from dotenv import load_dotenv
 from ha_client import get_thermometer_data
@@ -28,6 +26,7 @@ device_base = os.getenv("DEVICE_BASE", "sensor.temp_carport")
 HA_URL = os.getenv("HA_URL")
 
 downloader = WeatherCardDownloader("weather_card.png")
+
 
 def get_datetime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -52,15 +51,17 @@ async def main():
             current_temp = "error"
         else:
             current_temp = thermometer_data["temperature"]["state"]
+            display.set_led(0, 1, 0)  # Green LED for success
 
         # Update weather card image
         weather_card_path = await download_weather_card()
         if not weather_card_path:
             logger.error("Failed to update weather card")
             display.set_led(1, 0, 0)  # Red LED for error
+        else:
+            display.set_led(0, 1, 0)  # Green LED for success
 
-        # Update display every second for 10 seconds
-        for _ in range(10):
+        for _ in range(15):
             display.clear()
             display.graphics.draw_text_centered_horizontal(f"{current_temp}°C", 5, 40)
             if weather_card_path:
