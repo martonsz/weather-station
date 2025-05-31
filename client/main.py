@@ -27,6 +27,7 @@ display = Display()
 device_base = os.getenv("DEVICE_BASE", "sensor.temp_carport")
 HA_URL = os.getenv("HA_URL")
 
+downloader = WeatherCardDownloader("weather_card.png")
 
 def get_datetime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -34,7 +35,6 @@ def get_datetime():
 
 async def download_weather_card():
     """Download the weather card image from the server."""
-    downloader = WeatherCardDownloader("weather_card.png")
     return await downloader.download()
 
 

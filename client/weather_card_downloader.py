@@ -60,7 +60,7 @@ class WeatherCardDownloader:
                             content = await response.read()
                             with open(self.output_path, "wb") as f:
                                 f.write(content)
-                            logger.info(
+                            logger.debug(
                                 f"Successfully downloaded weather card from {server_url}"
                             )
                             return self.output_path
