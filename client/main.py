@@ -51,7 +51,7 @@ async def main():
             current_temp = "error"
         else:
             current_temp = thermometer_data["temperature"]["state"]
-            display.set_led(0, 0.1, 0)  # Green LED for success
+            display.set_led(0, 0, 0)  # Green LED for success
 
         # Update weather card image
         weather_card_path = await download_weather_card()
@@ -59,7 +59,7 @@ async def main():
             logger.error("Failed to update weather card")
             display.set_led(1, 0, 0)  # Red LED for error
         else:
-            display.set_led(0, 0.1, 0)  # Green LED for success
+            display.set_led(0, 0, 0)  # Green LED for success
 
         for _ in range(15):
             display.clear()
